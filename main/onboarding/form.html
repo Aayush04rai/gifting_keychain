@@ -1,0 +1,215 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Set up your keychain</title>
+<style>
+  :root { color-scheme: dark; }
+  * { box-sizing: border-box; }
+  body {
+    font-family: -apple-system, "Segoe UI", Roboto, sans-serif;
+    background: #0b0f14;
+    color: #fff;
+    margin: 0;
+  }
+  .wrap { max-width: 460px; margin: 0 auto; padding: 28px 20px 40px; }
+  .brand { text-align: center; margin-bottom: 8px; }
+  .brand .dot {
+    width: 10px; height: 10px; border-radius: 50%;
+    background: #d4af6a; display: inline-block; margin-bottom: 10px;
+  }
+  h1 { font-size: 21px; margin: 0 0 4px; text-align: center; font-weight: 600; }
+  .sub { color: #8a97a6; font-size: 13px; text-align: center; margin: 0 0 28px; }
+  section {
+    background: #12181f;
+    border: 1px solid #232b34;
+    border-radius: 14px;
+    padding: 18px 18px 6px;
+    margin-bottom: 16px;
+  }
+  section h2 {
+    font-size: 12px;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    color: #d4af6a;
+    margin: 0 0 14px;
+    font-weight: 600;
+  }
+  label { display: block; font-size: 13px; color: #9fb3c8; margin: 12px 0 6px; }
+  label:first-of-type { margin-top: 0; }
+  input[type=text], input[type=password] {
+    width: 100%;
+    padding: 11px 12px;
+    border-radius: 9px;
+    border: 1px solid #2a333d;
+    background: #0e1319;
+    color: #fff;
+    font-size: 15px;
+  }
+  select {
+    width: 100%;
+    padding: 11px 12px;
+    border-radius: 9px;
+    border: 1px solid #2a333d;
+    background: #0e1319;
+    color: #fff;
+    font-size: 15px;
+  }
+  input:focus, select:focus { outline: none; border-color: #d4af6a; }
+  .checks {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2px 12px;
+    margin-bottom: 6px;
+  }
+  .check {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 0;
+    font-size: 14px;
+    color: #e6ebf0;
+  }
+  .check input { width: 17px; height: 17px; accent-color: #d4af6a; }
+  .pick { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 6px; }
+  .choice { display: block; margin: 0; cursor: pointer; }
+  .choice input { position: absolute; opacity: 0; pointer-events: none; }
+  .choice span {
+    display: block;
+    padding: 14px 12px;
+    border-radius: 11px;
+    border: 1px solid #2a333d;
+    background: #0e1319;
+    color: #9fb3c8;
+    font-size: 12px;
+    line-height: 1.4;
+    text-align: center;
+  }
+  .choice span b { display: block; color: #fff; font-size: 16px; margin-bottom: 3px; font-weight: 600; }
+  .choice input:checked + span { border-color: #d4af6a; background: #181510; color: #d9c392; }
+  .choice input:focus-visible + span { outline: 2px solid #d4af6a; }
+  .hint { font-size: 12px; color: #63707d; margin: 8px 0 14px; }
+  .privacy {
+    font-size: 12px;
+    color: #63707d;
+    line-height: 1.5;
+    text-align: center;
+    padding: 0 8px;
+    margin: 4px 0 20px;
+  }
+  .privacy b { color: #9fb3c8; }
+  button {
+    width: 100%;
+    padding: 14px;
+    border-radius: 10px;
+    border: none;
+    background: #d4af6a;
+    color: #0b0f14;
+    font-weight: 700;
+    font-size: 16px;
+    letter-spacing: .02em;
+  }
+  button:active { opacity: .85; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="brand"><span class="dot"></span></div>
+  <h1>Set up your keychain</h1>
+  <p class="sub">Takes less than a minute. You can change everything later.</p>
+
+  <form method="POST" action="/save">
+    <section>
+      <h2>About you</h2>
+      <label>Your name</label>
+      <input type="text" name="name" required maxlength="31" placeholder="Jordan Lee">
+      <label>Title (optional)</label>
+      <input type="text" name="title" maxlength="31" placeholder="Chief Technology Officer">
+    </section>
+
+    <section>
+      <h2>What do you follow?</h2>
+      <div class="checks">
+        <label class="check"><input type="checkbox" name="int_ai">AI</label>
+        <label class="check"><input type="checkbox" name="int_robotics">Robotics</label>
+        <label class="check"><input type="checkbox" name="int_semi">Semiconductors</label>
+        <label class="check"><input type="checkbox" name="int_space">Space</label>
+        <label class="check"><input type="checkbox" name="int_tech">Technology</label>
+        <label class="check"><input type="checkbox" name="int_cyber">Cybersecurity</label>
+        <label class="check"><input type="checkbox" name="int_finance">Markets</label>
+        <label class="check"><input type="checkbox" name="int_ev">Electric vehicles</label>
+        <label class="check"><input type="checkbox" name="int_health">Healthcare</label>
+        <label class="check"><input type="checkbox" name="int_defence">Defence</label>
+        <label class="check"><input type="checkbox" name="int_travel">Travel</label>
+        <label class="check"><input type="checkbox" name="int_f1">Formula 1</label>
+        <label class="check"><input type="checkbox" name="int_football">Football</label>
+      </div>
+      <div class="hint">Your home screen shows a fresh headline from these every few minutes. Pick as many as you like.</div>
+    </section>
+
+    <section>
+      <h2>Your companion</h2>
+      <div class="pick">
+        <label class="choice">
+          <input type="radio" name="companion" value="male" checked>
+          <span><b>Him</b>Playful, a little mischievous</span>
+        </label>
+        <label class="choice">
+          <input type="radio" name="companion" value="female">
+          <span><b>Her</b>Expressive, a little dramatic</span>
+        </label>
+      </div>
+      <div class="hint">Your keychain's front screen shows what you follow. When it has been left alone for a few minutes, your companion appears to keep you company, and drops by now and then with a joke, a stretch or a quick check-in.</div>
+    </section>
+
+    <section>
+      <h2>Vibration</h2>
+      <div class="pick">
+        <label class="choice">
+          <input type="radio" name="vibration" value="on" checked>
+          <span><b>On</b>A soft buzz for reminders and choices</span>
+        </label>
+        <label class="choice">
+          <input type="radio" name="vibration" value="off">
+          <span><b>Off</b>Silent. Find my keychain still buzzes</span>
+        </label>
+      </div>
+      <div class="hint">A gentle tap tells you something has come up. If you find my keychain from your phone, it always buzzes firmly so you can locate it.</div>
+    </section>
+
+    <section>
+      <h2>Time zone</h2>
+      <label for="tz">Where will you use it?</label>
+      <select name="tz" id="tz">
+        <option value="IST-5:30" selected>India (IST)</option>
+        <option value="GST-4">UAE / Gulf</option>
+        <option value="GMT0BST,M3.5.0/1,M10.5.0">United Kingdom</option>
+        <option value="CET-1CEST,M3.5.0,M10.5.0/3">Central Europe</option>
+        <option value="EST5EDT,M3.2.0,M11.1.0">US Eastern</option>
+        <option value="CST6CDT,M3.2.0,M11.1.0">US Central</option>
+        <option value="MST7MDT,M3.2.0,M11.1.0">US Mountain</option>
+        <option value="PST8PDT,M3.2.0,M11.1.0">US Pacific</option>
+        <option value="SGT-8">Singapore / Hong Kong</option>
+        <option value="JST-9">Japan</option>
+        <option value="AEST-10AEDT,M10.1.0,M4.1.0/3">Australia (Sydney)</option>
+      </select>
+      <div class="hint">Sets the clock and when your companion is allowed to speak up.</div>
+    </section>
+
+    <section>
+      <h2>Home WiFi (optional)</h2>
+      <label>Network name</label>
+      <input type="text" name="wifi_ssid" maxlength="31" placeholder="Your WiFi SSID">
+      <label>Password</label>
+      <input type="password" name="wifi_password" maxlength="63">
+    </section>
+
+    <p class="privacy"><b>Privacy:</b> everything above is stored only on this device.
+    It is never uploaded to the cloud, sent to us, or shared with anyone.</p>
+
+    <button type="submit">Finish setup</button>
+  </form>
+</div>
+</body>
+</html>

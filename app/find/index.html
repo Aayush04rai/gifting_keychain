@@ -1,0 +1,254 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0b0f14">
+<title>Find my keychain</title>
+<style>
+  :root { color-scheme: dark; --gold: #d4af6a; --bg: #0b0f14; --card: #12181f; --line: #232b34; --text: #fff; --muted: #8a97a6; --ok: #5ec98a; --bad: #e0715f; }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body { height: 100%; }
+  body {
+    margin: 0; background: var(--bg); color: var(--text);
+    font-family: -apple-system, "Segoe UI", Roboto, sans-serif;
+    display: flex; flex-direction: column; align-items: center;
+    padding: max(24px, env(safe-area-inset-top)) 20px max(24px, env(safe-area-inset-bottom));
+  }
+  main { width: 100%; max-width: 440px; flex: 1; display: flex; flex-direction: column; }
+  .brand { text-align: center; margin: 8px 0 24px; }
+  .dot { width: 10px; height: 10px; border-radius: 50%; background: var(--gold); display: inline-block; margin-bottom: 10px; }
+  h1 { font-size: 22px; font-weight: 600; margin: 0 0 4px; }
+  .sub { color: var(--muted); font-size: 13px; margin: 0; }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 18px; margin-bottom: 14px; }
+  .row { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+  .label { font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: var(--gold); font-weight: 600; margin: 0 0 6px; }
+  .name { font-size: 18px; font-weight: 600; }
+  .state { font-size: 13px; color: var(--muted); margin-top: 2px; }
+  .state.ok { color: var(--ok); } .state.bad { color: var(--bad); }
+  .battery { text-align: right; font-size: 13px; color: var(--muted); }
+  .battery b { display: block; font-size: 20px; color: var(--text); font-weight: 600; }
+  button {
+    width: 100%; padding: 16px; border-radius: 12px; border: none; font-size: 16px; font-weight: 700;
+    letter-spacing: .02em; background: var(--gold); color: var(--bg); cursor: pointer;
+  }
+  button.secondary { background: transparent; color: var(--gold); border: 1px solid #3b3424; }
+  button.ring { height: 120px; font-size: 20px; border-radius: 18px; }
+  button.ringing { background: var(--bad); color: #fff; animation: pulse 1.2s ease-in-out infinite; }
+  button:disabled { opacity: .45; cursor: default; }
+  button:active:not(:disabled) { opacity: .85; }
+  @keyframes pulse { 50% { box-shadow: 0 0 0 10px rgba(224,113,95,.18); } }
+  .meter { height: 8px; border-radius: 4px; background: #1b232c; overflow: hidden; margin-top: 12px; }
+  .meter i { display: block; height: 100%; width: 0; background: var(--gold); transition: width .4s; }
+  .hint { color: var(--muted); font-size: 12px; line-height: 1.5; margin: 10px 2px 0; }
+  .note { border-color: #3b3424; }
+  .note b { color: var(--gold); }
+  .seg { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 12px; }
+  .seg button { padding: 12px; font-size: 14px; background: transparent; color: var(--muted); border: 1px solid var(--line); }
+  .seg button.on { color: var(--gold); border-color: var(--gold); background: #181510; }
+  .hidden { display: none !important; }
+  .gap { flex: 1; }
+</style>
+</head>
+<body>
+<main>
+  <div class="brand"><span class="dot"></span><h1>Find my keychain</h1><p class="sub">Make it announce itself, nearby</p></div>
+
+  <div id="unsupported" class="card note hidden">
+    <p class="label">This browser can't do Bluetooth</p>
+    <p class="hint" style="margin:0">Safari on iPhone doesn't support Web Bluetooth. On iPhone, open this page in the free <b>Bluefy</b> browser,
+    or use the keychain's app. On Android use <b>Chrome</b>. On a computer use Chrome or Edge.</p>
+  </div>
+
+  <div id="device" class="card">
+    <div class="row">
+      <div>
+        <p class="label">Your keychain</p>
+        <div class="name" id="name">Not connected</div>
+        <div class="state" id="state">Tap Connect and pick your keychain</div>
+      </div>
+      <div class="battery hidden" id="battery">Battery<b id="batteryPct">--</b></div>
+    </div>
+    <div class="meter hidden" id="meterWrap"><i id="meter"></i></div>
+    <p class="hint hidden" id="meterHint"></p>
+  </div>
+
+  <button id="connect">Connect</button>
+  <div style="height:12px"></div>
+  <div class="seg" role="group" aria-label="Ring strength">
+    <button id="gentle" type="button">Gentle</button>
+    <button id="strong" type="button" class="on">Strongest</button>
+  </div>
+  <button id="ring" class="ring" disabled>Ring my keychain</button>
+  <p class="hint" id="help">The keychain shows "Here I am!", flashes its light and buzzes softly. It stops when you pick it up.
+  The first time, it shows a 6-digit code on its screen: type that into the pairing prompt your phone shows.</p>
+
+  <div class="gap"></div>
+  <p class="hint" style="text-align:center">Range is about 10 to 30 m. Nothing here leaves your phone: it talks directly to the keychain.</p>
+</main>
+
+<script>
+"use strict";
+
+// ---- BLE adapter -------------------------------------------------------------
+// Everything Bluetooth goes through this one object. Today it is Web Bluetooth
+// (Android Chrome, desktop Chrome/Edge, iOS via the Bluefy browser). A native
+// wrapper (Capacitor) would provide the same four methods using a native plugin,
+// and nothing else on this page would change.
+const ble = {
+  IAS: "immediate_alert",
+  ALERT_LEVEL: "alert_level",
+  BATTERY: "battery_service",
+  BATTERY_LEVEL: "battery_level",
+  supported: () => !!navigator.bluetooth,
+  async pick() {
+    return navigator.bluetooth.requestDevice({
+      filters: [{ services: [this.IAS] }, { namePrefix: "Keychain" }],
+      optionalServices: [this.BATTERY, "device_information"],
+    });
+  },
+  async connect(device, onDisconnect) {
+    device.addEventListener("gattserverdisconnected", onDisconnect, { once: true });
+    const server = await device.gatt.connect();
+    const ias = await server.getPrimaryService(this.IAS);
+    const alert = await ias.getCharacteristic(this.ALERT_LEVEL);
+    let battery = null;
+    try {
+      const svc = await server.getPrimaryService(this.BATTERY);
+      battery = await svc.getCharacteristic(this.BATTERY_LEVEL);
+    } catch (e) { /* battery is a nicety */ }
+    return { server, alert, battery };
+  },
+  async setAlert(link, level) {
+    const data = new Uint8Array([level]);
+    if (link.alert.writeValueWithoutResponse) await link.alert.writeValueWithoutResponse(data);
+    else await link.alert.writeValue(data);
+  },
+  async readBattery(link) {
+    if (!link.battery) return null;
+    return (await link.battery.readValue()).getUint8(0);
+  },
+  disconnect(device) { if (device.gatt.connected) device.gatt.disconnect(); },
+};
+
+// ---- UI ----------------------------------------------------------------------
+const $ = (id) => document.getElementById(id);
+const els = {
+  name: $("name"), state: $("state"), connect: $("connect"), ring: $("ring"),
+  battery: $("battery"), batteryPct: $("batteryPct"),
+  meterWrap: $("meterWrap"), meter: $("meter"), meterHint: $("meterHint"),
+};
+let device = null, link = null, ringing = false, ringTimer = null;
+let level = 2; // 1 = gentle (an unobtrusive double tap), 2 = strongest (builds to continuous firm buzzes)
+
+function setState(text, kind) {
+  els.state.textContent = text;
+  els.state.className = "state" + (kind ? " " + kind : "");
+}
+
+function setRinging(on) {
+  ringing = on;
+  els.ring.textContent = on ? "Stop ringing" : "Ring my keychain";
+  els.ring.classList.toggle("ringing", on);
+  clearTimeout(ringTimer);
+  if (on) ringTimer = setTimeout(() => setRinging(false), 60000); // the keychain stops itself after 60 s
+}
+
+function onDisconnected() {
+  link = null;
+  setRinging(false);
+  els.ring.disabled = true;
+  els.battery.classList.add("hidden");
+  els.connect.textContent = device ? "Reconnect" : "Connect";
+  setState("Disconnected", "bad");
+}
+
+async function connect() {
+  els.connect.disabled = true;
+  try {
+    if (!device) {
+      device = await ble.pick();
+      els.name.textContent = device.name || "Keychain";
+      try { localStorage.setItem("keychain", device.name || ""); } catch (e) {}
+    }
+    setState("Connecting... (approve the pairing prompt if it appears)");
+    link = await ble.connect(device, onDisconnected);
+    setState("Connected", "ok");
+    els.connect.textContent = "Disconnect";
+    els.ring.disabled = false;
+    try {
+      const pct = await ble.readBattery(link);
+      if (pct !== null) { els.batteryPct.textContent = pct + "%"; els.battery.classList.remove("hidden"); }
+    } catch (e) { /* reading may need pairing first; the ring still works once paired */ }
+    watchSignal();
+  } catch (e) {
+    if (e && e.name === "NotFoundError") setState("No keychain chosen");
+    else setState("Couldn't connect: " + (e && e.message ? e.message : e), "bad");
+    link = null;
+  } finally {
+    els.connect.disabled = false;
+  }
+}
+
+async function toggleRing() {
+  if (!link) return;
+  els.ring.disabled = true;
+  try {
+    await ble.setAlert(link, ringing ? 0 : level);
+    setRinging(!ringing);
+    setState(ringing ? "Ringing - look for the light" : "Connected", ringing ? "bad" : "ok");
+  } catch (e) {
+    setState("Couldn't send: " + (e && e.message ? e.message : e), "bad");
+  } finally {
+    els.ring.disabled = false;
+  }
+}
+
+// Optional: while connected, show how close it is (needs advertisement watching,
+// which only some browsers allow; silently skipped where it is not available).
+async function watchSignal() {
+  if (!device || !device.watchAdvertisements) return;
+  try {
+    device.addEventListener("advertisementreceived", (ev) => {
+      const rssi = ev.rssi; // about -40 (very close) to -95 (far)
+      const pct = Math.max(0, Math.min(100, Math.round(((rssi + 95) / 55) * 100)));
+      els.meter.style.width = pct + "%";
+      els.meterWrap.classList.remove("hidden");
+      els.meterHint.classList.remove("hidden");
+      els.meterHint.textContent = pct > 75 ? "Very close" : pct > 45 ? "Nearby" : "Far";
+    });
+    await device.watchAdvertisements();
+  } catch (e) { /* not available here */ }
+}
+
+els.connect.addEventListener("click", () => {
+  if (link) { ble.disconnect(device); return; }
+  connect();
+});
+els.ring.addEventListener("click", toggleRing);
+
+// Changing strength while it rings switches the pattern straight away.
+async function chooseLevel(n) {
+  level = n;
+  $("gentle").classList.toggle("on", n === 1);
+  $("strong").classList.toggle("on", n === 2);
+  if (link && ringing) {
+    try { await ble.setAlert(link, level); } catch (e) { /* ignore */ }
+  }
+}
+$("gentle").addEventListener("click", () => chooseLevel(1));
+$("strong").addEventListener("click", () => chooseLevel(2));
+
+if (!ble.supported()) {
+  $("unsupported").classList.remove("hidden");
+  els.connect.disabled = true;
+  setState("Bluetooth isn't available in this browser", "bad");
+} else {
+  try {
+    const last = localStorage.getItem("keychain");
+    if (last) els.name.textContent = last;
+  } catch (e) {}
+}
+</script>
+</body>
+</html>

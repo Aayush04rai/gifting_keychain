@@ -1,0 +1,84 @@
+# Target the ESP32-S3 (Waveshare ESP32-S3-LCD-1.47B: ESP32-S3R8, 16 MB
+# flash, 8 MB octal PSRAM, no touch panel - QMI8658 IMU instead).
+CONFIG_IDF_TARGET="esp32s3"
+CONFIG_IDF_TARGET_ESP32S3=y
+CONFIG_ESPTOOLPY_FLASH_SAMPLE_MODE_STR=y
+CONFIG_ESPTOOLPY_FLASHMODE="dio"
+CONFIG_ESPTOOLPY_FLASHFREQ_80M=y
+CONFIG_ESPTOOLPY_FLASHFREQ="80m"
+CONFIG_ESPTOOLPY_FLASHSIZE_16MB=y
+CONFIG_ESPTOOLPY_FLASHSIZE="16MB"
+
+# Octal PSRAM (ESP32-S3R8).
+CONFIG_SPIRAM=y
+CONFIG_SPIRAM_MODE_OCT=y
+CONFIG_SPIRAM_SPEED_80M=y
+
+# Two 1700K OTA app slots (no factory slot), so a later esp_https_ota-based
+# update feature doesn't require re-partitioning devices already in the
+# field. 16 MB of flash leaves plenty of room; see README "Real-hardware
+# readiness".
+CONFIG_PARTITION_TABLE_TWO_OTA_LARGE=y
+
+# LVGL fonts used by the UI. 48 is the large digital-clock numeral used by
+# the digital/ring watch faces.
+CONFIG_LV_FONT_MONTSERRAT_14=y
+CONFIG_LV_FONT_MONTSERRAT_20=y
+CONFIG_LV_FONT_MONTSERRAT_48=y
+
+# Image/QR decode for branding assets and gift-redemption QR codes; see
+# managed_components/lvgl__lvgl/scripts/LVGLImage.py for converting source
+# images into LVGL C arrays.
+CONFIG_LV_USE_LODEPNG=y
+CONFIG_LV_USE_QRCODE=y
+
+# LVGL gets its own 4 MB heap, reserved in PSRAM at start-up (main/board/
+# lvgl_mem_psram.c). LVGL's built-in 64 KB pool ran out once the UI grew - the
+# rounded eyes render through ~20 KB temporary layers - and an exhausted pool
+# corrupts LVGL's draw queue so the display task spins forever. A private pool
+# can never be starved by Wi-Fi/TLS buffers, nor starve them; internal RAM stays
+# free for the radio.
+CONFIG_LV_USE_CUSTOM_MALLOC=y
+
+# Artwork on the microSD card (main/assets/): the card is mounted at /sdcard and
+# LVGL reads it as drive S: (e.g. S:ui/cat_ai.bin). Images are pre-converted to
+# LVGL's own .bin format, so showing one is a file read, not a PNG decode. 512 KB
+# of decoded images are cached in the UI pool, so a card shown again is not re-read.
+CONFIG_LV_USE_FS_POSIX=y
+CONFIG_LV_FS_POSIX_LETTER=83
+CONFIG_LV_FS_POSIX_PATH="/sdcard/"
+CONFIG_LV_CACHE_DEF_SIZE=524288
+CONFIG_LV_IMAGE_HEADER_CACHE_DEF_CNT=32
+CONFIG_FATFS_LFN_HEAP=y
+
+# Power management: required for the automatic light sleep that power.h turns
+# on while the character is deeply asleep (main/power/). With it enabled but
+# no sleep configured at runtime, the device behaves exactly as before.
+CONFIG_PM_ENABLE=y
+CONFIG_FREERTOS_USE_TICKLESS_IDLE=y
+
+# SoftAP support stays enabled (not STA-only) because first-run onboarding
+# will use a phone-facing captive portal (device broadcasts its own AP);
+# see README "Product experience" / onboarding.
+CONFIG_LV_FONT_MONTSERRAT_12=y
+CONFIG_LV_FONT_MONTSERRAT_16=y
+
+# Speed: LVGL software rendering is CPU-bound, and -Og is slow.
+CONFIG_COMPILER_OPTIMIZATION_PERF=y
+CONFIG_COMPILER_OPTIMIZATION_ASSERTIONS_SILENT=y
+CONFIG_PARTITION_TABLE_CUSTOM=y
+CONFIG_PARTITION_TABLE_CUSTOM_FILENAME="partitions.csv"
+
+# Bluetooth LE (find my keychain): NimBLE host, one connection, peripheral only.
+CONFIG_BT_ENABLED=y
+CONFIG_BT_NIMBLE_ENABLED=y
+CONFIG_BT_NIMBLE_MAX_CONNECTIONS=1
+CONFIG_BT_NIMBLE_ROLE_CENTRAL=n
+CONFIG_BT_NIMBLE_ROLE_OBSERVER=n
+CONFIG_BT_NIMBLE_NVS_PERSIST=y
+CONFIG_BT_NIMBLE_MAX_BONDS=3
+CONFIG_BT_NIMBLE_SM_SC=y
+CONFIG_BT_NIMBLE_GAP_DEVICE_NAME_MAX_LEN=24
+
+# TLS buffers in PSRAM: with Bluetooth running, internal RAM is too scarce for them.
+CONFIG_MBEDTLS_EXTERNAL_MEM_ALLOC=y

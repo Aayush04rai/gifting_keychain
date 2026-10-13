@@ -1,0 +1,18 @@
+dependencies:
+  idf:
+    version: '>=5.3.0'
+
+  # No vendor BSP exists for the ESP32-S3-LCD-1.47B; main/board/board_esp32.c
+  # drives esp_lcd/i2c/adc directly (all built into ESP-IDF itself) and
+  # only needs these managed components on top.
+  espressif/esp_lvgl_port:
+    version: "2.9.0"
+
+  espressif/led_strip:
+    version: "3.0.3"
+
+  espressif/button:
+    version: "4.2.1"
+
+  lvgl/lvgl:
+    version: "9.5.0"
