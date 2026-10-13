@@ -4,7 +4,7 @@ The keychain shows a 6-digit passkey on its screen; here the test build also pri
 it to the serial log (FIND_LOG_PASSKEY=1) so this script can type it in, the way a
 person would on a phone. Afterwards it rings the keychain over the encrypted link.
 
-    python tools/find_test_secure.py [COM10] [level 1|2] [seconds]
+    python utility/tools/find_test_secure.py [COM10] [level 1|2] [seconds]
 
 Needs `pip install bleak pyserial` (bleak brings the WinRT bindings).
 """

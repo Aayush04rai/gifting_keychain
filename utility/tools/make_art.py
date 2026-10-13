@@ -5,7 +5,7 @@ category tint) that fills the right half of the card and fades out on its left
 edge, so the card's own gradient shows through and no seam is possible. Run
 build_assets.py afterwards to convert to LVGL .bin files.
 
-    python tools/make_art.py            # system python with Pillow
+    python utility/tools/make_art.py            # system python with Pillow
 """
 import math, os, random
 from PIL import Image, ImageDraw, ImageFilter, ImageChops

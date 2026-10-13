@@ -109,5 +109,5 @@ bool board_battery_charging(void);
 int board_get_wifi_rssi(void);
 
 // Starts the USB serial listener that accepts files for the SD card
-// (tools/sd_push.py). Firmware only; the simulator reads its card directly.
+// (utility/tools/sd_push.py). Firmware only; the simulator reads its card directly.
 void sd_upload_start(void);

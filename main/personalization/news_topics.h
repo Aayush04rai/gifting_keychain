@@ -15,7 +15,7 @@ typedef struct {
     const char *label;
     const char *query;
     uint32_t accent;   // the category's tint on the card (chip, glow)
-    const char *art;   // LVGL path of its artwork on the SD card (see tools/make_art.py)
+    const char *art;   // LVGL path of its artwork on the SD card (see utility/tools/make_art.py)
 } news_topic_t;
 
 static const news_topic_t NEWS_TOPICS[] = {

@@ -3,7 +3,7 @@
 #include "card.h"
 
 // The card's background: a deep navy that darkens toward the bottom. The news
-// artwork on the SD card (tools/make_art.py) is transparent, so it sits on
+// artwork on the SD card (utility/tools/make_art.py) is transparent, so it sits on
 // this gradient with no visible edge.
 #define CARD_BG_TOP 0x0e1626
 #define CARD_BG_BOT 0x080c15

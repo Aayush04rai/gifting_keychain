@@ -11,7 +11,7 @@
 #include "board_hal.h"
 
 // Copies files onto the microSD over the USB cable, so the card never has to
-// come out of the product. tools/sd_push.py is the host side. The protocol is
+// come out of the product. utility/tools/sd_push.py is the host side. The protocol is
 // one text line followed by the raw file bytes:
 //
 //   host:   SDPUT <path under the card root> <size>\n<size bytes>

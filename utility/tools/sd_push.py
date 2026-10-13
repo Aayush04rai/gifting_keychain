@@ -1,6 +1,6 @@
 """Pushes assets/sd/ to the microSD in the device, over its USB cable.
 
-    <idf python> tools/sd_push.py [COM10] [folder]
+    <idf python> utility/tools/sd_push.py [COM10] [folder]
 
 Needs pyserial (the ESP-IDF python env has it). Files go to the same relative
 path on the card. The firmware must be the version with sd_upload.c.
@@ -9,7 +9,7 @@ import os, sys, time
 import serial
 
 port = sys.argv[1] if len(sys.argv) > 1 else "COM10"
-root = sys.argv[2] if len(sys.argv) > 2 else os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "assets", "sd")
+root = sys.argv[2] if len(sys.argv) > 2 else os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), "assets", "sd")
 
 s = serial.Serial(port, 115200, timeout=0.2)
 s.dtr = False; s.rts = False  # do not reset the chip on open

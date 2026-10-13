@@ -1,7 +1,7 @@
 """Talks to the keychain over Bluetooth from a PC, to test "find my keychain".
 
-    python tools/find_test.py scan            # list nearby keychains
-    python tools/find_test.py ring [seconds]  # connect, ring, stop after N s (default 6)
+    python utility/tools/find_test.py scan            # list nearby keychains
+    python utility/tools/find_test.py ring [seconds]  # connect, ring, stop after N s (default 6)
 
 Needs `pip install bleak`. A build with FIND_INSECURE_TEST=1 accepts this without
 pairing; the shipping build requires the passkey pairing (the OS shows a dialog).
